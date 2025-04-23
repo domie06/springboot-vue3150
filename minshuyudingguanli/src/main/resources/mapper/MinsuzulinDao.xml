@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.MinsuzulinDao">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.minsu_id as minsuId
+        ,a.yonghu_id as yonghuId
+        ,a.ruzhu_time as ruzhuTime
+        ,a.tuifang_time as tuifangTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.MinsuzulinView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,minsu.minsu_name as minsuName
+        ,minsu.fangdong_id as fangdongId
+        ,minsu.fagwu_types as fagwuTypes
+        ,minsu.minsu_new_money as minsuNewMoney
+        ,minsu.minsu_photo as minsuPhoto
+        ,minsu.minsu_address as minsuAddress
+        ,minsu.fwstate_types as fwstateTypes
+        ,minsu.minsu_content as minsuContent
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_photo as yonghuPhoto
+
+        FROM minsuzulin  a
+        left JOIN minsu minsu ON a.minsu_id = minsu.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.minsuId != null and params.minsuId != ''">
+                and a.minsu_id = #{params.minsuId}
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and a.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test=" params.ruzhuTimeStart != '' and params.ruzhuTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.ruzhu_time) >= UNIX_TIMESTAMP(#{params.ruzhuTimeStart}) ]]>
+            </if>
+            <if test=" params.ruzhuTimeEnd != '' and params.ruzhuTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.ruzhu_time) <= UNIX_TIMESTAMP(#{params.ruzhuTimeEnd}) ]]>
+            </if>
+            <if test=" params.tuifangTimeStart != '' and params.tuifangTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.tuifang_time) >= UNIX_TIMESTAMP(#{params.tuifangTimeStart}) ]]>
+            </if>
+            <if test=" params.tuifangTimeEnd != '' and params.tuifangTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.tuifang_time) <= UNIX_TIMESTAMP(#{params.tuifangTimeEnd}) ]]>
+            </if>
+
+            <if test=" params.minsuName != '' and params.minsuName != null and params.minsuName != 'null' ">
+                and minsu.minsu_name like CONCAT('%',#{params.minsuName},'%')
+            </if>
+            <if test="params.fagwuTypes != null  and params.fagwuTypes != ''">
+                and minsu.fagwu_types = #{params.fagwuTypes}
+            </if>
+            <if test="params.fangdongId != null  and params.fangdongId != ''">
+                and minsu.fangdong_id = #{params.fangdongId}
+            </if>
+
+            <if test="params.minsuNewMoneyStart != null ">
+                <![CDATA[  and minsu.minsu_new_money >= #{params.minsuNewMoneyStart}   ]]>
+            </if>
+            <if test="params.minsuNewMoneyEnd != null ">
+                <![CDATA[  and minsu.minsu_new_money <= #{params.minsuNewMoneyEnd}   ]]>
+            </if>
+            <if test=" params.minsuAddress != '' and params.minsuAddress != null and params.minsuAddress != 'null' ">
+                and minsu.minsu_address like CONCAT('%',#{params.minsuAddress},'%')
+            </if>
+            <if test="params.fwstateTypes != null  and params.fwstateTypes != ''">
+                and minsu.fwstate_types = #{params.fwstateTypes}
+            </if>
+
+            <if test=" params.minsuContent != '' and params.minsuContent != null and params.minsuContent != 'null' ">
+                and minsu.minsu_content like CONCAT('%',#{params.minsuContent},'%')
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
